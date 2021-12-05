@@ -15,8 +15,9 @@ def _sum(arr = [], number=""):
     return arr
 
 def reduceFromBinary(arr = []):
-    print(arr)
-    res = int("".join(repr(str(n)) for n in arr).replace("'", ""), 2)
+    res = 0
+    if len(arr):
+        res = int("".join(repr(str(n)) for n in arr).replace("'", ""), 2)
     return res
 
 
@@ -42,16 +43,15 @@ with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
 def searchMostAppeared( original, _index = 0 ):
     arrOfZeros= []
     arrOfOnes= []
-    for number in original:
-        ( arrOfZeros if number[_index] == "0" else arrOfOnes ).append(number)
-    return arrOfOnes if len(arrOfOnes) > len(arrOfZeros) else arrOfZeros
+    for _number in original:
+        ( arrOfZeros if _number[_index] == "0" else arrOfOnes ).append(_number)
+    return arrOfOnes if len(arrOfOnes) >= len(arrOfZeros) else arrOfZeros
 
-def searchLessAppeared( original = [], _index = 0 ):
+def searchLessAppeared( original, _index = 0 ):
     arrOfZeros= []
     arrOfOnes= []
-    for number in original:
-        print( f'{number} {number[ _index ]} {number[_index] == "0"} {_index}')
-        ( arrOfZeros if number[_index] == "0" else arrOfOnes ).append(number)
+    for _number in original:
+        ( arrOfZeros if _number[_index] == "0" else arrOfOnes ).append(_number)
     return arrOfOnes if len(arrOfOnes) < len(arrOfZeros) else arrOfZeros
 
 
@@ -61,6 +61,7 @@ with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
     index = 0
     for line in file:
         line = line.replace("\n", "")
+
         if  line[0] == str(gamma[ 0 ]) :
             oxygen.append( line )
         else:
@@ -72,9 +73,7 @@ with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
             oxygen = searchMostAppeared(oxygen, index)
 
         if len( co2 ) > 1:
-            co2 = searchLessAppeared(oxygen, index)
+            co2 = searchLessAppeared(co2, index)
 
-    print(co2)
-    print(oxygen)
     print(f'The consumption of the submarine is {reduceFromBinary(oxygen)*reduceFromBinary(co2)}')
 
