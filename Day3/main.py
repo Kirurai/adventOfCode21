@@ -75,5 +75,5 @@ with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
         if len( co2 ) > 1:
             co2 = searchLessAppeared(co2, index)
 
-    print(f'The consumption of the submarine is {reduceFromBinary(oxygen)*reduceFromBinary(co2)}')
+    print(f'The consumption of the submarine is { reduceFromBinary(oxygen)*reduceFromBinary(co2) }')
 
