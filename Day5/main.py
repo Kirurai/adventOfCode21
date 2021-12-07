@@ -93,7 +93,7 @@ def secondProblem( _numerosSorteados, _cartonesBingo ):
 
     for _number in _numerosSorteados:
         for i in range( len( _cartonesBingo ) ):
-            if not _cartonesBingo[ i ]:
+            if _cartonesBingo[ i ] == True: # No reducible porque puede dar True por otros valores
                 continue
             _cartonesBingo[ i ] = checkNumberExistence( _cartonesBingo[ i ], _number )
             if checkForWin( _cartonesBingo[ i ] ):
@@ -102,7 +102,7 @@ def secondProblem( _numerosSorteados, _cartonesBingo ):
                     lose( _cartonesBingo[ i ], _number )
                     return
 
-                cartonesBingo[ i ] = False
+                cartonesBingo[ i ] = True
     _cartonesBingo = cleanCards(_cartonesBingo)
 
 
