@@ -2,124 +2,96 @@ from utils.Reader import Reader
 import os
 
 
-def sumOfAllUnmarkedNumbers( _matrix ):
-    _acc = 0
-    for _line in _matrix:
-        for _number in _line:
-            if not _line[_number]:
-                _acc += int(_number)
-    return _acc
+def isVerticalLine( xComponentStart, xComponentEnd ):
+    return  xComponentStart == xComponentEnd
 
-def checkNumberExistence( _matrix, _number ):
-    for _line in _matrix:
-        if _number in _line.keys():
-            _line[_number] = True
-    return _matrix
+def isHorizontalLine( yComponentStart, yComponentEnd ):
+    return  yComponentStart == yComponentEnd
 
-def trasposeMatrix( _matrix ):
-    arr = [{}, {}, {},  {}, {}]
-    arrIndex = 0
-    for i in range(len(_matrix)):
-        for key in _matrix[i]:
-            arr[arrIndex][key] = _matrix[i][key]
-            arrIndex += 1
-        arrIndex = 0
-    return arr
+def isDiagonalLine( xComponentStart, yComponentStart, xComponentEnd, yComponentEnd ):
+    return  (abs( xComponentStart - yComponentStart ) == abs( xComponentEnd - yComponentEnd )) or \
+            ( xComponentStart + yComponentStart  ==  xComponentEnd + yComponentEnd )
 
-def isWinnerLine( _line ):
-    return False not in _line.values()
+def bringLargerNumber( original, possibleLargers = [] ):
+    larger = original
+    for i in possibleLargers:
+        larger = i if larger < i else larger
+    return  larger
 
-def hasWinnerColumn( _matrix ):
-    for _line in _matrix:
-        if isWinnerLine(_line):
-            return True
-    return False
+def bringDataAsInt( line ):
+    return [ int(i) for i in line.replace("\n", "").replace(" -> ", ",").split(",") ]
 
-def hasWinnerRow( _matrix ):
-    for _line in trasposeMatrix(_matrix):
-        if isWinnerLine(_line):
-            return True
-    return False
+def vectorUnitario( first, second ):
+    return int((second - first)/abs(second - first))
 
-def checkForWin( _matrix ):
-    return hasWinnerColumn( _matrix ) or hasWinnerRow( _matrix )
+def countOverlaps( overlapMatrix ):
+    acc = 0
+    for i in overlapMatrix:
+        for j in i:
+            if j > 1:
+                acc += 1
+    return acc
 
 # First Problem
-def won( _matrix, _lastNumber ):
-    _lastNumber = int(_lastNumber)
-    _acc = sumOfAllUnmarkedNumbers(_matrix)
-    print(f'The value of the sum of all unmarked numbers multiply for first bingo card by the winner number is {_acc*_lastNumber}')
-
-def firstProblem( _numerosSorteados, _cartonesBingo ):
-    for _number in _numerosSorteados:
-        for _matrix in _cartonesBingo:
-            _matrix = checkNumberExistence( _matrix, _number )
-            if checkForWin( _matrix ):
-                won( _matrix, _number )
-                return
-
-# First Problem
-with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
-    numerosSorteados = (file.readline()).replace("\n", "").split(",")
-    cartonesBingo = []
-    for line in file:
-        if line == "\n":
-            cartonesBingo.append([])
-        else:
-            cartonesBingo[-1].append( line.replace("\n", "").replace("  ", " ").strip().split(" ") )
-            cartonesBingo[-1][-1] = { i: False for i in cartonesBingo[-1][-1] }
-
-    firstProblem(numerosSorteados, cartonesBingo)
-
-# Second Problem
-def lose( _matrix, _lastNumber ):
-    _lastNumber = int( _lastNumber )
-    _acc = sumOfAllUnmarkedNumbers(_matrix)
-    print( f'The value of the sum of all unmarked numbers multiply for first bingo card by the winner number is {_acc * _lastNumber}' )
-
-
-def cleanCards( _cartonesBingo ):
-    indexToDelete = []
-    for i in range(len(_cartonesBingo)):
-        if _cartonesBingo[i] == {}:
-            indexToDelete.append(i)
-    for index in indexToDelete:
-        _cartonesBingo.pop(-len(_cartonesBingo) + index)
-    return _cartonesBingo
-
-
-def secondProblem( _numerosSorteados, _cartonesBingo ):
-    _cartonesResueltos = 0
-
-    for _number in _numerosSorteados:
-        for i in range( len( _cartonesBingo ) ):
-            if _cartonesBingo[ i ] == True: # No reducible porque puede dar True por otros valores
-                continue
-            _cartonesBingo[ i ] = checkNumberExistence( _cartonesBingo[ i ], _number )
-            if checkForWin( _cartonesBingo[ i ] ):
-                _cartonesResueltos += 1
-                if _cartonesResueltos == 100:
-                    lose( _cartonesBingo[ i ], _number )
-                    return
-
-                cartonesBingo[ i ] = True
-    _cartonesBingo = cleanCards(_cartonesBingo)
-
+def solveFirstProblem( startPoints, endPoints, overlapMatrix ):
+    for start, end in zip(startPoints, endPoints):
+        if isVerticalLine(start[0], end[0]):
+            for i in range(abs(start[1] - end[1]) + 1):
+                overlapMatrix[ start[0] ][ start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
+        if isHorizontalLine(start[1], end[1]):
+            for i in range(abs(start[0] - end[0]) + 1):
+                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] ] += 1
+        if isDiagonalLine( start[0], start[1], end[0], end[1]):
+            for i in range(abs(start[0] - end[0]) + 1):
+                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
+    print(f'Are {countOverlaps( overlapMatrix )} that have at least 2 lines overlap' )
 
 with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
-    numerosSorteados = (file.readline()).replace("\n", "").split(",")
-    cartonesBingo = []
-    solved = False
+    startPoints = []
+    endPoints = []
+    maxNumber = 0
+    overlapMatrix = []
     for line in file:
-        if line == "\n":
-            cartonesBingo.append([])
-        else:
-            cartonesBingo[-1].append( line.replace("\n", "").replace("  ", " ").strip().split(" ") )
-            cartonesBingo[-1][-1] = { i: False for i in cartonesBingo[-1][-1] }
+        xInicio, yInicio, xFinal, yFinal = bringDataAsInt(line)
+        if isVerticalLine( xInicio, xFinal) or isHorizontalLine( yInicio, yFinal):
+            maxNumber = bringLargerNumber( maxNumber, [ xInicio, yInicio, xFinal, yFinal ])
+            startPoints.append( [xInicio, yInicio] )
+            endPoints.append( [xFinal, yFinal] )
 
-    secondProblem(numerosSorteados, cartonesBingo)
+    for i in range(maxNumber + 1):
+        overlapMatrix.append([0]*(maxNumber +1))
+
+    solveFirstProblem(startPoints, endPoints, overlapMatrix)
 
 
 
+# First Second
+def solveSecondProblem( startPoints, endPoints, overlapMatrix ):
+    for start, end in zip(startPoints, endPoints):
+        if isVerticalLine(start[0], end[0]):
+            for i in range(abs(start[1] - end[1]) + 1):
+                overlapMatrix[ start[0] ][ start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
+        if isHorizontalLine(start[1], end[1]):
+            for i in range(abs(start[0] - end[0]) + 1):
+                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] ] += 1
+    print(f'Are {countOverlaps( overlapMatrix )} that have at least 2 lines overlap' )
+
+with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
+    startPoints = []
+    endPoints = []
+    maxNumber = 0
+    overlapMatrix = []
+    for line in file:
+        # Por los ejemplo de la web, parece que los puntos son primero ordenada y luego abscisa
+        yInicio, xInicio, yFinal, xFinal = bringDataAsInt(line)
+        if isVerticalLine( xInicio, xFinal) or isHorizontalLine( yInicio, yFinal) or isDiagonalLine(xInicio, yInicio, xFinal, yFinal):
+            maxNumber = bringLargerNumber( maxNumber, [ xInicio, yInicio, xFinal, yFinal ])
+            startPoints.append( [xInicio, yInicio] )
+            endPoints.append( [xFinal, yFinal] )
+
+    for i in range(maxNumber + 1):
+        overlapMatrix.append([0]*(maxNumber +1))
+
+    solveFirstProblem(startPoints, endPoints, overlapMatrix)
 
 
