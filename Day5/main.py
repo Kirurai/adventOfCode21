@@ -46,6 +46,19 @@ def solveFirstProblem( startPoints, endPoints, overlapMatrix ):
                 overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
     print(f'Are {countOverlaps( overlapMatrix )} that have at least 2 lines overlap' )
 
+def solveSecondProblem( startPoints, endPoints, overlapMatrix ):
+    for start, end in zip(startPoints, endPoints):
+        if isVerticalLine(start[0], end[0]):
+            for i in range(abs(start[1] - end[1]) + 1):
+                overlapMatrix[ start[0] ][ start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
+        if isHorizontalLine(start[1], end[1]):
+            for i in range(abs(start[0] - end[0]) + 1):
+                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] ] += 1
+        if isDiagonalLine( start[0], start[1], end[0], end[1]):
+            for i in range(abs(start[0] - end[0]) + 1):
+                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
+    print(f'Are {countOverlaps( overlapMatrix )} that have at least 2 lines overlap' )
+
 with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
     startPoints = []
     endPoints = []
@@ -74,11 +87,7 @@ def solveSecondProblem( startPoints, endPoints, overlapMatrix ):
         if isHorizontalLine(start[1], end[1]):
             for i in range(abs(start[0] - end[0]) + 1):
                 overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] ] += 1
-        if isDiagonalLine( start[0], start[1], end[0], end[1]):
-            for i in range(abs(start[0] - end[0]) + 1):
-                overlapMatrix[ start[0] + i*vectorUnitario( start[0], end[0] ) ][start[1] + i*vectorUnitario( start[1], end[1] ) ] += 1
     print(f'Are {countOverlaps( overlapMatrix )} that have at least 2 lines overlap' )
-
 
 with Reader( 'Dataset.txt', os.path.dirname( __file__ ) ) as file:
     startPoints = []
